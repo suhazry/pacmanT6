@@ -1045,29 +1045,58 @@
             }).catch(err => console.error("Ralat simpan skor:", err));
         }
 
-        // FUNGSI MEMBACA & MEMAPARKAN 1 PEMAIN TERBAIK SAHAJA
-        function loadTopPlayer() {
-            const container = document.getElementById("top-player-content");
+       // 1. FUNGSI MEMBACA PEMAIN TERBAIK
+function loadTopPlayer() {
+    const container = document.getElementById("top-player-content");
 
-            if (GOOGLE_SCRIPT_URL.includes("AKfycbx...")) {
-                let localData = JSON.parse(localStorage.getItem('rbt_scores') || "[]");
-                if (localData.length > 0) {
-                    localData.sort((a, b) => a.skor - b.skor);
-                    renderTopPlayer(localData[0]);
-                } else {
-                    container.innerHTML = "<div class='top-player-detail'>Tiada rekod buat masa ini.</div>";
-                }
-                return;
-            }
-
-            fetch(GOOGLE_SCRIPT_URL)
-                .then(res => res.json())
-                .then(data => renderTopPlayer(data))
-                .catch(() => {
-                    container.innerHTML = "<div class='top-player-detail' style='color:#FF5555;'>Gagal memuatkan rekod.</div>";
-                });
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("AKfycbx...")) {
+        let localData = JSON.parse(localStorage.getItem('rbt_scores') || "[]");
+        if (localData.length > 0) {
+            localData.sort((a, b) => a.skor - b.skor);
+            renderTopPlayer(localData[0]);
+        } else {
+            container.innerHTML = "<div class='top-player-detail'>Tiada rekod buat masa ini.</div>";
         }
+        return;
+    }
 
+    // Menggunakan fetch dengan redirect follow (Diperlukan oleh Apps Script)
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: "GET",
+        redirect: "follow"
+    })
+    .then(res => res.json())
+    .then(data => {
+        renderTopPlayer(data);
+    })
+    .catch(err => {
+        console.error("Ralat panggil data:", err);
+        container.innerHTML = "<div class='top-player-detail' style='color:#FF5555;'>Gagal memuatkan rekod.</div>";
+    });
+}
+
+        // 2. FUNGSI MENYIMPAN SKOR DENGAN TEXT/PLAIN (ELAK ISU CORS BLOCKED)
+function saveScoreToGoogleSheet(nama, kelas, skor) {
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("AKfycbx...")) {
+        saveLocalLeaderboard(nama, kelas, skor);
+        return;
+    }
+
+    const payload = JSON.stringify({ nama: nama, kelas: kelas, skor: skor });
+
+    // Menggunakan text/plain menghalang browser daripada menghantar CORS preflight OPTIONS request yang gagal di Google Script
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: payload
+    })
+    .then(() => {
+        console.log("Skor berjaya dihantar!");
+    })
+    .catch(err => console.error("Ralat simpan skor:", err));
+}
+        
         function saveLocalLeaderboard(nama, kelas, skor) {
             let localData = JSON.parse(localStorage.getItem('rbt_scores') || "[]");
             localData.push({ nama: nama, kelas: kelas, skor: parseFloat(skor) });
