@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Game RBT Pacman - Panitia RBT SK Taman Molek</title>
+
+    <!-- Import Font 'Fredoka' dari Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            background-color: #0b0c10;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        /* Header UI Menegak */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 4px;
+            text-align: center;
+            width: 100%;
+            background: linear-gradient(180deg, #1f1f2e 0%, #11111a 100%);
+            border-bottom: 2px solid #00E676;
+            flex-shrink: 0;
+            height: 38px;
+        }
+
+        .header img {
+            height: 26px;
+            width: auto;
+        }
+
+        .header-text h2 {
+            font-size: 0.78rem;
+            color: #FFD700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.4);
+        }
+
+        .header-text h3 {
+            font-size: 0.62rem;
+            color: #E0E0E0;
+            font-weight: 400;
+        }
+
+        /* Skrin Mula Menegak */
+        #login-screen {
+            background-color: #1e1e2e;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+            width: 90vw;
+            max-width: 380px;
+            text-align: center;
+            border: 2px solid #333;
+            margin: auto 0;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .logo-welcome {
+            width: 70px;
+            height: auto;
+            margin-bottom: 6px;
+        }
+
+        .input-group {
+            margin: 8px 0;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 0.75rem;
+            color: #ccc;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background-color: #2a2a3c;
+            color: #fff;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        button {
+            background: linear-gradient(135deg, #FFD700, #FF9900);
+            color: #000;
+            border: none;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 6px;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        button:hover {
+            transform: scale(1.02);
+        }
+
+        /* Kad Kad Pemain Terbaik (Top Player Card) */
+        #top-player-box {
+            margin-top: 12px;
+            background: linear-gradient(135deg, #2a2a3d 0%, #161623 100%);
+            border: 1.5px solid #FFD700;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+
+        #top-player-box h4 {
+            color: #FFD700;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .top-player-info {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.85rem;
+            color: #00E676;
+        }
+
+        .top-player-detail {
+            color: #FFFFFF;
+            font-size: 0.78rem;
+            margin-top: 2px;
+        }
+
+        /* Container Permainan Skrin Menegak Penuh */
+        #game-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100vw;
+            height: calc(100vh - 38px);
+            padding: 4px;
+            gap: 4px;
+        }
+
+        #top-ui {
+            width: 100%;
+            background: linear-gradient(145deg, #181824, #10101a);
+            border: 2px solid #00BFFF;
+            border-radius: 10px;
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+            box-shadow: 0 0 12px rgba(0, 191, 255, 0.25);
+        }
+
+        #stats-bar {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 0.72rem;
+            font-weight: bold;
+            color: #00E676;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+
+        /* Reka Bentuk Kad Soalan Premium */
+        #question-box-card {
+            background: linear-gradient(135deg, #1f2330 0%, #0f1118 100%);
+            border: 1.5px solid #FFD700;
+            border-radius: 8px;
+            width: 100%;
+            padding: 8px 10px;
+            box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.25);
+            padding-bottom: 3px;
+        }
+
+        .q-badge {
+            background: linear-gradient(90deg, #FFD700, #FF8C00);
+            color: #000;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .q-tag {
+            color: #00E676;
+            font-size: 0.65rem;
+            font-weight: bold;
+        }
+
+        .q-text {
+            font-family: 'Fredoka', 'Segoe UI', sans-serif;
+            color: #FFFFFF;
+            font-size: 0.92rem;
+            font-weight: 600;
+            line-height: 1.3;
+            text-align: center;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.3px;
+        }
+
+        /* Gelanggang Canvas Menegak Memenuhi Skrin */
+        #canvas-wrapper {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        canvas {
+            background-color: #000000;
+            border: 2px solid #1E90FF;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.8);
+            touch-action: none;
+            cursor: pointer;
+        }
+
+        #justification-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.88);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 15px;
+        }
+
+        .modal-content {
+            background-color: #21252b;
+            padding: 16px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 100%;
+            border: 2px solid #FF5555;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            color: #FF5555;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 8px;
+            line-height: 1.3;
+            font-size: 0.8rem;
+            color: #E0E0E0;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .powerup-active {
+            color: #00BFFF !important;
+            animation: blink 0.5s infinite alternate;
+        }
+
+        @keyframes blink {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header UI -->
+    <div class="header">
+        <img src="LOGO_SEKOLAH-no bg ori.png" alt="Logo SK Taman Molek" id="school-logo-header">[cite: 2, 3]
+        <div class="header-text">
+            <h2>PANITIA RBT SK TAMAN MOLEK</h2>
+            <h3>Time Trial Pacman RBT Tahun 6</h3>
+        </div>
+    </div>
+
+    <!-- Skrin Mula & Pendaftaran Murid -->
+    <div id="login-screen">
+        <img src="LOGO_SEKOLAH-no bg ori.png" alt="Logo SK Taman Molek" class="logo-welcome">[cite: 2, 3]
+        <h3 style="margin-bottom: 6px; color: #FFD700; font-size: 0.95rem;">Daftar Pemain</h3>
+        
+        <div class="input-group">
+            <label for="player-name">Nama Murid:</label>
+            <input type="text" id="player-name" placeholder="Contoh: Muhammad Ali">
+        </div>
+
+        <div class="input-group">
+            <label for="player-class">Kelas:</label>
+            <select id="player-class">
+                <option value="">-- Pilih Kelas --</option>
+                <option value="Arif 1">Arif 1</option>
+                <option value="Arif 2">Arif 2</option>
+                <option value="Arif 3">Arif 3</option>
+                <option value="Bijak 1">Bijak 1</option>
+                <option value="Bijak 2">Bijak 2</option>
+                <option value="Bijak 3">Bijak 3</option>
+                <option value="Cerdik 1">Cerdik 1</option>
+                <option value="Cerdik 2">Cerdik 2</option>
+                <option value="Cerdik 3">Cerdik 3</option>
+            </select>
+        </div>
+
+        <button onclick="startGame()">MULA PERMAINAN</button>
+
+        <!-- Paparan Khas Pemain Terbaik Sahaja -->
+        <div id="top-player-box">
+            <h4>🏆 Pemain Terbaik (Masa Terpantas)</h4>
+            <div id="top-player-content">
+                <div class="top-player-detail">Memuatkan data dari Google Sheet...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skrin Permainan Canvas Menegak -->
+    <div id="game-container">
+        <div id="top-ui">
+            <div id="stats-bar">
+                <span>Pemain: <span id="disp-name" style="color:#fff;">-</span> (<span id="disp-class" style="color:#fff;">-</span>)</span>
+                <span>Masa: <span id="timer-display" style="color:#FFD700;">0.0s</span></span>
+                <span>Nyawa: <span id="lives-display" style="color:#FF5555;">❤️❤️❤️</span></span>
+                <span>Soalan: <span id="progress-display" style="color:#00E676;">0/5</span></span>
+            </div>
+
+            <!-- Kad Soalan Bercahaya Neon -->
+            <div id="question-box-card">
+                <div class="q-header">
+                    <span class="q-badge" id="q-badge-num">SOALAN 1</span>
+                    <span class="q-tag">Makan Bola [✓/✗]</span>
+                </div>
+                <div class="q-text" id="question-text">Memuatkan soalan...</div>
+            </div>
+
+            <div id="powerup-status" style="font-size: 0.7rem; height: 12px;"></div>
+        </div>
+        
+        <div id="canvas-wrapper">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Modal Justifikasi Jawapan Salah -->
+    <div id="justification-modal">
+        <div class="modal-content">
+            <h3>JAWAPAN KURANG TEPAT!</h3>
+            <p id="modal-explanation"></p>
+            <p style="font-size: 0.75rem; color: #FFD700; font-weight: bold;">⚠️ 1 Soalan Tambahan Telah Ditambah!</p>
+            <button onclick="resumeGame()">Faham & Teruskan</button>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
+
+        // Bank Soalan RBT Tahun 6 (Soalan 1 - 45)
+        const questionBank = [
+            { id: 1, text: "Elemen elektromekanikal ialah gabungan komponen elektrik, elektronik dan mekanikal yang membolehkan perkakasan berfungsi mengikut tugasnya.", answer: true, reason: "Elemen elektromekanikal menggabungkan tiga jenis komponen: elektrik, elektronik dan mekanikal. Gabungan itu membolehkan perkakasan seperti mesin basuh berfungsi mengikut tugasnya." },
+            { id: 2, text: "Meja makan ialah contoh perkakasan elektromekanikal.", answer: false, reason: "Meja makan tidak mempunyai komponen elektrik, elektronik atau bahagian yang digerakkan oleh motor. Mesin basuh ialah contoh perkakasan elektromekanikal." },
+            { id: 3, text: "Panel solar terdapat pada mesin basuh.", answer: false, reason: "Mesin basuh mendapat bekalan elektrik melalui plag 3 pin, bukan panel solar. Komponennya ialah takal, motor, tali sawat dan panel kawalan." },
+            { id: 4, text: "Komponen ergonomik bukan salah satu elemen elektromekanikal.", answer: true, reason: "Elemen elektromekanikal terdiri daripada komponen mekanikal, elektrik dan elektronik. Ergonomik berkaitan keselesaan pengguna dan bukan elemen elektromekanikal." },
+            { id: 5, text: "Sensor ialah komponen yang menukarkan tenaga elektrik kepada tenaga kinetik untuk menghasilkan pergerakan.", answer: false, reason: "Komponen yang menukarkan tenaga elektrik kepada tenaga kinetik ialah motor. Sensor mengesan perubahan persekitaran dan menghantar isyarat." },
+            { id: 6, text: "Takal dan tali sawat ialah komponen mekanikal dalam sebuah mesin basuh.", answer: true, reason: "Takal dan tali sawat ialah komponen mekanikal kerana ia memindahkan gerakan secara fizikal." },
+            { id: 7, text: "Fungsi plag 3 pin pada mesin basuh ialah mengawal keseluruhan sistem elektromekanikal.", answer: false, reason: "Plag 3 pin berfungsi menyambungkan perkakasan elektrik kepada bekalan kuasa elektrik. Panel kawalan yang mengawal keseluruhan sistem." },
+            { id: 8, text: "Alatan yang telah digunakan untuk membuat projek perlu dibuang.", answer: false, reason: "Alatan yang telah digunakan perlu disimpan dan disenggara di tempat yang sesuai supaya boleh digunakan semula." },
+            { id: 9, text: "Motor ialah komponen yang memusingkan dram pada mesin basuh.", answer: true, reason: "Motor menukarkan tenaga elektrik kepada tenaga kinetik dan memusingkan dram melalui tali sawat dan takal." },
+            { id: 10, text: "Panel kawalan berfungsi memberi arahan khusus kepada mesin basuh.", answer: true, reason: "Panel kawalan mengawal mesin basuh dengan memberi arahan khusus kepada komponen lain." },
+            { id: 11, text: "Fungsi gear ialah menyambung perkakasan elektrik kepada bekalan kuasa elektrik.", answer: false, reason: "Itu fungsi plag 3 pin. Gear ialah komponen mekanikal yang memindahkan kuasa supaya kelajuan atau arah pergerakan mesin dapat diubah." },
+            { id: 12, text: "Panel kawalan menggerakkan objek seperti memutarkan dram mesin basuh apabila dihubungkan dengan motor menggunakan tali sawat.", answer: false, reason: "Panel kawalan hanya mengawal dan memberi arahan. Pemutaran dram dilakukan oleh komponen mekanikal (takal dan tali sawat)." },
+            { id: 13, text: "Motor berfungsi menukarkan tenaga elektrik kepada tenaga kinetik untuk menghasilkan pergerakan.", answer: true, reason: "Itulah fungsi motor: tenaga elektrik ditukarkan kepada tenaga kinetik sehingga menghasilkan putaran atau pergerakan." },
+            { id: 14, text: "Sensor berfungsi mengawal keseluruhan sistem elektromekanikal.", answer: false, reason: "Sensor mengesan perubahan persekitaran dan menghantar isyarat. Panel kawalan yang mengawal keseluruhan sistem." },
+            { id: 15, text: "Papan litar (papan kawalan) berfungsi mengawal keseluruhan sistem elektromekanikal.", answer: true, reason: "Papan litar (papan kawalan) mengawal keseluruhan sistem elektromekanikal." },
+            { id: 16, text: "Roda bergigi ialah contoh perkakasan elektromekanikal.", answer: false, reason: "Roda bergigi (gear) ialah komponen mekanikal, bukan perkakasan lengkap." },
+            { id: 17, text: "Susunan komponen yang kemas menerangkan elemen reka bentuk dari segi rupa.", answer: true, reason: "Dari segi rupa, penampilan produk dinilai daripada susunan komponen yang kemas dan teratur." },
+            { id: 18, text: "Membuat lakaran idea ialah langkah awal dalam membina sesuatu produk.", answer: true, reason: "Langkah awal ialah membuat lakaran idea." },
+            { id: 19, text: "Batang aiskrim ialah alatan untuk membuat produk.", answer: false, reason: "Batang aiskrim ialah bahan, bukan alatan." },
+            { id: 20, text: "Dalam pembentangan produk, murid perlu menunjukkan demonstrasi produk, menyatakan nama tajuk projek serta menyatakan bahan, alatan dan komponen yang digunakan.", answer: true, reason: "Ketiga-tiga perkara itu perlu dalam pembentangan produk." },
+            { id: 21, text: "Tali sawat berfungsi menukarkan tenaga elektrik kepada tenaga kinetik untuk menghasilkan pergerakan.", answer: false, reason: "Tali sawat ialah komponen mekanikal. Penukaran tenaga dilakukan oleh motor." },
+            { id: 22, text: "Langkah membuat kemasan pada produk sesuai dilakukan sebelum memasang komponen elektronik.", answer: false, reason: "Kemasan dibuat pada peringkat akhir, selepas bahagian dicantum dan produk berfungsi." },
+            { id: 23, text: "Cat licau boleh digunakan untuk membuat kemasan.", answer: true, reason: "Cat licau digunakan untuk mewarna dan mengemas permukaan produk." },
+            { id: 24, text: "Pembaris dan gunting serba guna ialah alatan yang diperlukan untuk membina kerangka kereta kawalan jauh.", answer: true, reason: "Pembaris dan gunting serba guna ialah alatan untuk mengukur dan memotong." },
+            { id: 25, text: "Selepas menilai lakaran, kita perlu terus membina produk.", answer: false, reason: "Selepas lakaran dinilai, langkah seterusnya ialah melukis lakaran yang telah ditambah baik." },
+            { id: 26, text: "Cat sembur ialah salah satu bahan yang digunakan untuk membuat kemasan pada produk.", answer: true, reason: "Cat sembur digunakan untuk mewarna dan mengemas permukaan produk." },
+            { id: 27, text: "Mikrobit ialah contoh elemen pergerakan dalam sistem robotik.", answer: false, reason: "Mikrobit ialah papan mikropengawal, iaitu elemen kawalan." },
+            { id: 28, text: "Sensor ultrasonik mengesan objek menggunakan gelombang bunyi seperti lembu.", answer: false, reason: "Sensor ultrasonik berfungsi seperti kelawar yang menggunakan gelombang bunyi untuk mengesan halangan." },
+            { id: 29, text: "Antena pemancar dipasang pada papan isyarat pemancar alat kawalan jauh menggunakan skru.", answer: true, reason: "Skru digunakan supaya antena terpasang kukuh pada papan isyarat." },
+            { id: 30, text: "Kemasan pada produk dibuat pada peringkat akhir penghasilan projek.", answer: true, reason: "Kemasan ialah langkah terakhir, selepas produk siap dibina dan berfungsi." },
+            { id: 31, text: "Proses mengukur dan menanda pada kotak untuk membina kereta kawalan jauh dilakukan menggunakan pembaris dan pensel.", answer: true, reason: "Proses mengukur dan menanda dibuat menggunakan pembaris dan pensel sebelum memotong." },
+            { id: 32, text: "Bateri digunakan untuk melekatkan komponen pada robot.", answer: false, reason: "Bateri ialah punca kuasa. Rod perekat panas digunakan untuk melekatkan komponen." },
+            { id: 33, text: "Pistol perekat panas ialah alatan yang mempunyai dua bilah tajam.", answer: false, reason: "Pistol perekat panas mempunyai muncung dan wayar kuasa. Gunting yang mempunyai dua bilah." },
+            { id: 34, text: "In MakeCode Editor, Scripts Area ialah ruang menempatkan blok atur cara yang telah digabungkan menjadi satu arahan lengkap.", answer: true, reason: "Scripts Area ialah ruang kerja tempat blok atur cara disusun." },
+            { id: 35, text: "Jumlah kos bagi RM1.00 + RM6.50 + RM55.00 + RM16.00 + RM2.00 ialah RM79.00.", answer: false, reason: "Jumlah sebenar ialah RM80.50, bukan RM79.00." },
+            { id: 36, text: "Lakaran idea awal mengandungi label bahagian dan ukuran dimensi yang tepat.", answer: false, reason: "Lakaran bermaklumat mempunyai label dan ukuran. Lakaran idea awal ialah lakaran kasar tanpa ukuran." },
+            { id: 37, text: "Saiz ialah elemen yang digunakan untuk menilai lakaran idea projek.", answer: true, reason: "Saiz atau ukuran dinilai untuk memastikan reka bentuk sesuai dan boleh dibina." },
+            { id: 38, text: "Jadual kerja merancang urutan aktiviti dan tempoh masa supaya projek siap mengikut waktu yang ditetapkan.", answer: true, reason: "Tujuan jadual kerja ialah memastikan aktiviti dilaksanakan mengikut ketetapan masa." },
+            { id: 39, text: "Kabel USB ialah papan untuk memasang litar yang dikenali sebagai bod impra.", answer: false, reason: "Kabel USB ialah penyambung data/kuasa. Bod impra ialah papan plastik gelombang." },
+            { id: 40, text: "Persembahan multimedia seperti slaid, gambar dan video ialah kaedah terbaik untuk membuat pembentangan produk.", answer: true, reason: "Persembahan multimedia menarik, jelas dan membantu penonton memahami produk." },
+            { id: 41, text: "Jika produk yang dihasilkan tidak berfungsi semasa diuji, kita perlu berputus asa.", answer: false, reason: "Kita perlu memeriksa penyambungan wayar dan membaiki kelemahan, bukan berputus asa." },
+            { id: 42, text: "Motor servo ialah komponen yang mempunyai bilah di atas dan tiga wayar penyambung.", answer: true, reason: "Itu adalah ciri-ciri fizikal motor servo." },
+            { id: 43, text: "Pembaz (buzzer) ialah punca kuasa yang digunakan untuk menghasilkan Tabung Duit Automatik.", answer: false, reason: "Punca kuasa ialah bateri AA. Pembaz menghasilkan bunyi." },
+            { id: 44, text: "Mikropengawal dalam robot berfungsi mengawal keseluruhan sistem robot.", answer: true, reason: "Mikropengawal ialah elemen kawalan utama sistem robotik." },
+            { id: 45, text: "Lakaran produk dinilai supaya lakaran menjadi lebih cantik dan berwarna-warni.", answer: false, reason: "Lakaran dinilai untuk mengenal pasti kelemahan dan menguji kesesuaian idea." }
+        ];
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'eat') {
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'hit') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + 0.5);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now); osc.stop(now + 0.5);
+            } else if (type === 'powerup') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            }
+        }
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Peta Permainan MENENGAK DEDIKASI (11 Lajur x 17 Baris)
+        const grid = [
+            [1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,1,0,0,0,0,1],
+            [1,0,1,1,0,1,0,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,0,1,1,1,0,1,0,1],
+            [1,0,0,0,0,1,0,0,0,0,1],
+            [1,1,1,0,1,1,1,0,1,1,1],
+            [1,0,0,0,1,0,1,0,0,0,1],
+            [1,0,1,0,0,0,0,0,1,0,1],
+            [1,0,0,0,1,0,1,0,0,0,1],
+            [1,1,1,0,1,1,1,0,1,1,1],
+            [1,0,0,0,0,1,0,0,0,0,1],
+            [1,0,1,0,1,1,1,0,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,0,1,0,1,1,0,1],
+            [1,0,0,0,0,1,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        // 3 Rumah Selamat
+        const safeZones = [
+            { x: 1, y: 1, w: 2, h: 2 },
+            { x: 4, y: 7, w: 3, h: 3 },
+            { x: 8, y: 14, w: 2, h: 2 }
+        ];
+
+        let tileSize = 40;
+        let playerName = "";
+        let playerClass = "";
+        let lives = 3;
+        let timer = 0;
+        let timerInterval = null;
+        let gameLoopId = null;
+        let isPaused = false;
+
+        let activeQuestions = [];
+        let currentQuestion = null;
+        let completedCount = 0;
+        let targetTotal = 5;
+
+        let balls = [];
+        
+        let pacman = {
+            x: 0,
+            y: 0,
+            targetX: null,
+            targetY: null,
+            radius: 13,
+            speed: 3,
+            vx: 0,
+            vy: 0,
+            angle: 0,
+            mouthAngle: 0.2,
+            mouthSpeed: 0.02,
+            invincibleTimer: 0,
+            isHit: false,
+            hitTimer: 0
+        };
+
+        function resizeCanvasToFit() {
+            const wrapper = document.getElementById('canvas-wrapper');
+            if (!wrapper) return;
+
+            const wWidth = wrapper.clientWidth;
+            const wHeight = wrapper.clientHeight;
+
+            const gridCols = grid[0].length; 
+            const gridRows = grid.length;    
+
+            const scaleX = wWidth / (gridCols * 40);
+            const scaleY = wHeight / (gridRows * 40);
+            
+            const scale = Math.min(scaleX, scaleY);
+
+            canvas.width = gridCols * 40;
+            canvas.height = gridRows * 40;
+
+            canvas.style.width = `${canvas.width * scale}px`;
+            canvas.style.height = `${canvas.height * scale}px`;
+        }
+
+        window.addEventListener('resize', resizeCanvasToFit);
+
+        window.addEventListener('keydown', e => {
+            if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(e.key)) {
+                e.preventDefault();
+            }
+            if (isPaused || pacman.isHit) return;
+
+            pacman.targetX = null; 
+            pacman.targetY = null;
+
+            if (e.key === 'ArrowUp' || e.key === 'w') { pacman.vx = 0; pacman.vy = -pacman.speed; }
+            if (e.key === 'ArrowDown' || e.key === 's') { pacman.vx = 0; pacman.vy = pacman.speed; }
+            if (e.key === 'ArrowLeft' || e.key === 'a') { pacman.vx = -pacman.speed; pacman.vy = 0; }
+            if (e.key === 'ArrowRight' || e.key === 'd') { pacman.vx = pacman.speed; pacman.vy = 0; }
+        });
+
+        function handlePointerInput(e) {
+            e.preventDefault();
+            if (isPaused || pacman.isHit) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            let clientX, clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            pacman.targetX = (clientX - rect.left) * scaleX;
+            pacman.targetY = (clientY - rect.top) * scaleY;
+        }
+
+        canvas.addEventListener('touchstart', handlePointerInput, { passive: false });
+        canvas.addEventListener('touchmove', handlePointerInput, { passive: false });
+        canvas.addEventListener('mousedown', handlePointerInput);
+
+        function startGame() {
+            playerName = document.getElementById('player-name').value.trim();
+            playerClass = document.getElementById('player-class').value;
+
+            if (!playerName) {
+                alert("Sila masukkan Nama Murid!");
+                return;
+            }
+
+            if (!playerClass) {
+                alert("Sila pilih Kelas daripada senarai dropdown!");
+                return;
+            }
+
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'flex';
+
+            document.getElementById('disp-name').innerText = playerName;
+            document.getElementById('disp-class').innerText = playerClass;
+
+            resizeCanvasToFit();
+
+            let shuffled = shuffleArray(questionBank);
+            activeQuestions = shuffled.slice(0, 5);
+            targetTotal = 5;
+            completedCount = 0;
+            lives = 3;
+            timer = 0;
+            isPaused = false;
+
+            respawnPacmanCenterSafeZone();
+            resetAndRefreshBalls();
+            nextQuestion();
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!isPaused && !pacman.isHit) {
+                    timer += 0.1;
+                    document.getElementById('timer-display').innerText = timer.toFixed(1) + "s";
+                }
+            }, 100);
+
+            cancelAnimationFrame(gameLoopId);
+            gameLoop();
+        }
+
+        function respawnPacmanCenterSafeZone() {
+            let centerZone = safeZones[1];
+            pacman.x = (centerZone.x + centerZone.w / 2) * tileSize;
+            pacman.y = (centerZone.y + centerZone.h / 2) * tileSize;
+            pacman.vx = 0; 
+            pacman.vy = 0;
+            pacman.targetX = null; 
+            pacman.targetY = null;
+            pacman.isHit = false;
+            pacman.hitTimer = 0;
+        }
+
+        function isInSafeZone(x, y) {
+            return safeZones.some(z => {
+                let zx1 = z.x * tileSize;
+                let zx2 = (z.x + z.w) * tileSize;
+                let zy1 = z.y * tileSize;
+                let zy2 = (z.y + z.h) * tileSize;
+                return x >= zx1 && x <= zx2 && y >= zy1 && y <= zy2;
+            });
+        }
+
+        function isWall(x, y, radius = 0) {
+            let points = [
+                {x: x - radius, y: y - radius},
+                {x: x + radius, y: y - radius},
+                {x: x - radius, y: y + radius},
+                {x: x + radius, y: y + radius}
+            ];
+
+            return points.some(p => {
+                let gridX = Math.floor(p.x / tileSize);
+                let gridY = Math.floor(p.y / tileSize);
+                if (gridY < 0 || gridY >= grid.length || gridX < 0 || gridX >= grid[0].length) return true;
+                return grid[gridY][gridX] === 1;
+            });
+        }
+
+        function resetAndRefreshBalls() {
+            balls = [];
+            createBall('green');
+            createBall('green');
+            createBall('red');
+            createBall('red');
+            createBall('blue');
+        }
+
+        function createBall(type) {
+            let valid = false;
+            let bx, by;
+
+            while (!valid) {
+                let gx = Math.floor(Math.random() * (grid[0].length - 2)) + 1;
+                let gy = Math.floor(Math.random() * (grid.length - 2)) + 1;
+
+                if (grid[gy][gx] === 0) {
+                    bx = gx * tileSize + 20;
+                    by = gy * tileSize + 20;
+
+                    if (!isInSafeZone(bx, by) && Math.hypot(bx - pacman.x, by - pacman.y) > 80) {
+                        valid = true;
+                    }
+                }
+            }
+
+            const speeds = [-0.5, 0.5];
+            let vx = speeds[Math.floor(Math.random() * 2)];
+            let vy = speeds[Math.floor(Math.random() * 2)];
+
+            balls.push({
+                x: bx,
+                y: by,
+                vx: vx,
+                vy: vy,
+                radius: 10,
+                type: type
+            });
+        }
+
+        function nextQuestion() {
+            if (activeQuestions.length === 0) {
+                endGame(true);
+                return;
+            }
+            currentQuestion = activeQuestions[0];
+            document.getElementById('q-badge-num').innerText = `SOALAN ${completedCount + 1}/${targetTotal}`;
+            document.getElementById('question-text').innerText = currentQuestion.text;
+            updateProgressDisplay();
+        }
+
+        function updateProgressDisplay() {
+            document.getElementById('progress-display').innerText = `${completedCount}/${targetTotal}`;
+            let heartStr = "";
+            for (let i = 0; i < lives; i++) heartStr += "❤️";
+            document.getElementById('lives-display').innerText = heartStr;
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            if (pacman.isHit) {
+                pacman.hitTimer--;
+                if (pacman.hitTimer <= 0) {
+                    pacman.isHit = false;
+                    isPaused = true;
+                    document.getElementById('modal-explanation').innerText = currentQuestion.reason;
+                    document.getElementById('justification-modal').style.display = 'flex';
+                }
+                return;
+            }
+
+            if (isPaused) return;
+
+            if (pacman.targetX !== null && pacman.targetY !== null) {
+                let dx = pacman.targetX - pacman.x;
+                let dy = pacman.targetY - pacman.y;
+                let dist = Math.hypot(dx, dy);
+
+                if (dist < pacman.speed) {
+                    pacman.x = pacman.targetX;
+                    pacman.y = pacman.targetY;
+                    pacman.vx = 0;
+                    pacman.vy = 0;
+                    pacman.targetX = null;
+                    pacman.targetY = null;
+                } else {
+                    pacman.vx = (dx / dist) * pacman.speed;
+                    pacman.vy = (dy / dist) * pacman.speed;
+                }
+            }
+
+            if (pacman.vx !== 0) {
+                let nextX = pacman.x + pacman.vx;
+                if (!isWall(nextX, pacman.y, pacman.radius)) {
+                    pacman.x = nextX;
+                } else {
+                    pacman.vx = 0;
+                    pacman.targetX = null;
+                }
+            }
+
+            if (pacman.vy !== 0) {
+                let nextY = pacman.y + pacman.vy;
+                if (!isWall(pacman.x, nextY, pacman.radius)) {
+                    pacman.y = nextY;
+                } else {
+                    pacman.vy = 0;
+                    pacman.targetY = null;
+                }
+            }
+
+            if (pacman.vx !== 0 || pacman.vy !== 0) {
+                pacman.angle = Math.atan2(pacman.vy, pacman.vx);
+            }
+
+            if (pacman.invincibleTimer > 0) {
+                pacman.invincibleTimer -= 1/60;
+                document.getElementById('powerup-status').innerText = `KEBAL (INVISIBLE): ${Math.ceil(pacman.invincibleTimer)}s`;
+                document.getElementById('powerup-status').className = 'powerup-active';
+            } else {
+                document.getElementById('powerup-status').innerText = '';
+                document.getElementById('powerup-status').className = '';
+            }
+
+            pacman.mouthAngle += pacman.mouthSpeed;
+            if (pacman.mouthAngle > 0.45 || pacman.mouthAngle < 0.05) pacman.mouthSpeed = -pacman.mouthSpeed;
+
+            balls.forEach(b => {
+                let nextBx = b.x + b.vx;
+                let nextBy = b.y + b.vy;
+
+                if (isWall(nextBx, b.y, b.radius) || isInSafeZone(nextBx, b.y)) {
+                    b.vx = -b.vx;
+                } else {
+                    b.x += b.vx;
+                }
+
+                if (isWall(b.x, nextBy, b.radius) || isInSafeZone(b.x, nextBy)) {
+                    b.vy = -b.vy;
+                } else {
+                    b.y += b.vy;
+                }
+
+                const dist = Math.hypot(b.x - pacman.x, b.y - pacman.y);
+                if (dist < pacman.radius + b.radius) {
+                    handleCollision(b);
+                }
+            });
+        }
+
+        function handleCollision(ball) {
+            if (pacman.invincibleTimer > 0) {
+                if (ball.type === 'blue') {
+                    playSound('powerup');
+                    pacman.invincibleTimer = 4.0;
+                    balls = balls.filter(b => b !== ball);
+                }
+                return;
+            }
+
+            if (ball.type === 'blue') {
+                playSound('powerup');
+                pacman.invincibleTimer = 4.0;
+                balls = balls.filter(b => b !== ball);
+                return;
+            }
+
+            const playerChoice = (ball.type === 'green');
+            const isCorrect = (playerChoice === currentQuestion.answer);
+
+            if (isCorrect) {
+                playSound('eat');
+                activeQuestions.shift();
+                completedCount++;
+                resetAndRefreshBalls();
+
+                if (activeQuestions.length > 0) {
+                    nextQuestion();
+                } else {
+                    endGame(true);
+                }
+            } else {
+                playSound('hit');
+                pacman.isHit = true;
+                pacman.hitTimer = 30;
+
+                let unchosen = questionBank.filter(q => !activeQuestions.includes(q));
+                let extraQ = unchosen.length > 0 
+                    ? unchosen[Math.floor(Math.random() * unchosen.length)] 
+                    : questionBank[Math.floor(Math.random() * questionBank.length)];
+                
+                activeQuestions.push(extraQ);
+                targetTotal++;
+                updateProgressDisplay();
+
+                resetAndRefreshBalls();
+            }
+        }
+
+        function resumeGame() {
+            document.getElementById('justification-modal').style.display = 'none';
+            respawnPacmanCenterSafeZone();
+            isPaused = false;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dinding Labirin
+            for (let r = 0; r < grid.length; r++) {
+                for (let c = 0; c < grid[r].length; c++) {
+                    if (grid[r][c] === 1) {
+                        ctx.fillStyle = '#1919A6';
+                        ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
+                        ctx.strokeStyle = '#1E90FF';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(c * tileSize + 2, r * tileSize + 2, tileSize - 4, tileSize - 4);
+                    }
+                }
+            }
+
+            // Rumah Selamat
+            safeZones.forEach(z => {
+                ctx.fillStyle = 'rgba(0, 255, 255, 0.15)';
+                ctx.fillRect(z.x * tileSize, z.y * tileSize, z.w * tileSize, z.h * tileSize);
+                ctx.strokeStyle = '#00FFFF';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 4]);
+                ctx.strokeRect(z.x * tileSize, z.y * tileSize, z.w * tileSize, z.h * tileSize);
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = '#00FFFF';
+                ctx.font = 'bold 11px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                let centerX = (z.x + z.w / 2) * tileSize;
+                let centerY = (z.y + z.h / 2) * tileSize;
+                ctx.fillText("RUMAH", centerX, centerY);
+            });
+
+            // Target Indicator
+            if (pacman.targetX !== null && pacman.targetY !== null && !pacman.isHit) {
+                ctx.beginPath();
+                ctx.arc(pacman.targetX, pacman.targetY, 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
+                ctx.fill();
+            }
+
+            // Bola-Bola
+            balls.forEach(b => {
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                if (b.type === 'green') {
+                    ctx.fillStyle = '#00E676'; ctx.shadowColor = '#00E676';
+                } else if (b.type === 'red') {
+                    ctx.fillStyle = '#FF2A6D'; ctx.shadowColor = '#FF2A6D';
+                } else if (b.type === 'blue') {
+                    ctx.fillStyle = '#00BFFF'; ctx.shadowColor = '#00BFFF';
+                }
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 9px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                let label = b.type === 'green' ? '✓' : (b.type === 'red' ? '✗' : '★');
+                ctx.fillText(label, b.x, b.y);
+            });
+
+            // Pacman
+            if (!pacman.isHit) {
+                ctx.beginPath();
+                let color = pacman.invincibleTimer > 0 ? '#00BFFF' : '#FFD700';
+                ctx.fillStyle = color;
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 10;
+
+                let startAngle = pacman.angle + pacman.mouthAngle * Math.PI;
+                let endAngle = pacman.angle + (2 - pacman.mouthAngle) * Math.PI;
+
+                ctx.arc(pacman.x, pacman.y, pacman.radius, startAngle, endAngle);
+                ctx.lineTo(pacman.x, pacman.y);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            } else {
+                ctx.beginPath();
+                ctx.arc(pacman.x, pacman.y, pacman.radius + 8, 0, Math.PI * 2);
+                ctx.fillStyle = '#FF4500';
+                ctx.shadowColor = '#FF0000';
+                ctx.shadowBlur = 30;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(pacman.x, pacman.y, pacman.radius + 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#FFD700';
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function endGame(isWin) {
+            clearInterval(timerInterval);
+            cancelAnimationFrame(gameLoopId);
+
+            if (isWin) {
+                alert(`TAHNIAH! Anda berjaya menamatkan permainan dalam masa ${timer.toFixed(1)} saat!`);
+                saveScoreToGoogleSheet(playerName, playerClass, timer.toFixed(1));
+            } else {
+                alert("GAME OVER! Nyawa anda telah habis.");
+            }
+
+            location.reload();
+        }
+
+        function saveScoreToGoogleSheet(nama, kelas, skor) {
+            if (GOOGLE_SCRIPT_URL.includes("AKfycbx...")) {
+                saveLocalLeaderboard(nama, kelas, skor);
+                return;
+            }
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nama: nama, kelas: kelas, skor: skor })
+            }).catch(err => console.error("Ralat simpan skor:", err));
+        }
+
+        // FUNGSI MEMBACA & MEMAPARKAN 1 PEMAIN TERBAIK SAHAJA
+        function loadTopPlayer() {
+            const container = document.getElementById("top-player-content");
+
+            if (GOOGLE_SCRIPT_URL.includes("AKfycbx...")) {
+                let localData = JSON.parse(localStorage.getItem('rbt_scores') || "[]");
+                if (localData.length > 0) {
+                    localData.sort((a, b) => a.skor - b.skor);
+                    renderTopPlayer(localData[0]);
+                } else {
+                    container.innerHTML = "<div class='top-player-detail'>Tiada rekod buat masa ini.</div>";
+                }
+                return;
+            }
+
+            fetch(GOOGLE_SCRIPT_URL)
+                .then(res => res.json())
+                .then(data => renderTopPlayer(data))
+                .catch(() => {
+                    container.innerHTML = "<div class='top-player-detail' style='color:#FF5555;'>Gagal memuatkan rekod.</div>";
+                });
+        }
+
+        function saveLocalLeaderboard(nama, kelas, skor) {
+            let localData = JSON.parse(localStorage.getItem('rbt_scores') || "[]");
+            localData.push({ nama: nama, kelas: kelas, skor: parseFloat(skor) });
+            localData.sort((a, b) => a.skor - b.skor);
+            localStorage.setItem('rbt_scores', JSON.stringify(localData));
+        }
+
+        function renderTopPlayer(player) {
+            const container = document.getElementById("top-player-content");
+            if (!player) {
+                container.innerHTML = "<div class='top-player-detail'>Tiada pemegang rekod lagi. Ajak murid jadi yang pertama!</div>";
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="top-player-info">👑 ${player.nama || player.NAMA}</div>
+                <div class="top-player-detail">Kelas: <b>${player.kelas || player.KELAS}</b> | Masa: <b style="color:#FFD700;">${player.skor || player.SKOR}s</b></div>
+            `;
+        }
+
+        loadTopPlayer();
+    </script>
+</body>
+</html>
